@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+.results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.week {
+    border: 1px solid #ddd;
+    margin: 10px;
+    padding: 10px;
+    width: 200px;
+}
+
+.week h2 {
+    font-size: 1.2em;
+    margin-top: 0;
+}
+
+.numbers {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.number {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    margin: 5px;
+    border-radius: 50%;
+    background: #eee;
+}
+
+.joker, .superstar {
+    margin-top: 10px;
+    padding: 5px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+}
