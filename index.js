@@ -5,10 +5,13 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
-const http = require('node:http');
+const express = require('express'); // http yerine express
 const cron = require('node-cron');
 const mongoose = require('mongoose');
-require('dotenv').config(); // .env desteği
+require('dotenv').config();
+
+const app = express();
+const PORT = 8080;
 
 // =========================
 //  MONGODB BAĞLANTISI
@@ -31,23 +34,25 @@ const ResultSchema = new mongoose.Schema({
   dateFetched: { type: Date, default: Date.now }
 });
 
-const Result = mongoose.model('results', ResultSchema); // collection adı: results
+const Result = mongoose.model('results', ResultSchema);
 
 // =========================
-//  WEB SUNUCUSU
+//  EXPRESS MIDDLEWARE
 // =========================
-http.createServer(function (req, res) {
-  fs.readFile('index.html', function (err, data) {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 Not Found');
-    } else {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.write(data);
-      res.end();
-    }
-  });
-}).listen(8080, () => console.log('🌐 Server is running at http://localhost:8080'));
+app.use(express.static(__dirname)); // index.html ve script.js erişimi
+
+// =========================
+//  API: TÜM VERİLERİ DÖN
+// =========================
+app.get('/api/results', async (req, res) => {
+  try {
+    const data = await Result.find().sort({ week: -1 });
+    res.json(data);
+  } catch (error) {
+    console.error("API hatası:", error);
+    res.status(500).json({ error: "Veritabanından veri alınamadı." });
+  }
+});
 
 // =========================
 //  YARDIMCI FONKSİYONLAR
@@ -146,4 +151,11 @@ cron.schedule('0 9 * * 1', async () => {
   console.log('📆 Pazartesi sabahı: haftalık veri güncellemesi başlıyor...');
   await main();
   console.log('✅ Haftalık güncelleme tamamlandı.');
+});
+
+// =========================
+//  SUNUCUYU BAŞLAT
+// =========================
+app.listen(PORT, () => {
+  console.log(`🌐 Server running at http://localhost:${PORT}`);
 });
