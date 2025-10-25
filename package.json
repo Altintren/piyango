@@ -5,8 +5,11 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
-    "axios": "^1.7.2",
-    "cheerio": "^1.0.0-rc.12",
-    "express": "^4.19.2"
+    "axios": "^1.12.2",
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.3",
+    "express": "^4.19.2",
+    "mongoose": "^8.19.2",
+    "node-cron": "^4.2.1"
   }
 }
