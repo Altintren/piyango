@@ -5,7 +5,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
-const express = require('express'); // http yerine express
+const express = require('express');
 const cron = require('node-cron');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -39,7 +39,7 @@ const Result = mongoose.model('results', ResultSchema);
 // =========================
 //  EXPRESS MIDDLEWARE
 // =========================
-app.use(express.static(__dirname)); // index.html ve script.js erişimi
+app.use(express.static(__dirname));
 
 // =========================
 //  API: TÜM VERİLERİ DÖN
@@ -55,8 +55,75 @@ app.get('/api/results', async (req, res) => {
 });
 
 // =========================
-//  YARDIMCI FONKSİYONLAR
+//  API: TAHMİN ÜRET
 // =========================
+app.get('/api/predictions', async (req, res) => {
+  try {
+    const data = await Result.find();
+
+    const numbersFrequency = {};
+    const jokerFrequency = {};
+    const superstarFrequency = {};
+
+    // Frekans hesaplama
+    for (const result of data) {
+      const numbers = result.numbers;
+      if (!numbers || numbers.length < 8) continue;
+
+      // İlk 6 sayı
+      for (let i = 0; i < 6; i++) {
+        const num = numbers[i];
+        numbersFrequency[num] = (numbersFrequency[num] || 0) + 1;
+      }
+
+      // Joker
+      const joker = numbers[6];
+      jokerFrequency[joker] = (jokerFrequency[joker] || 0) + 1;
+
+      // Süperstar
+      const superstar = numbers[7];
+      superstarFrequency[superstar] = (superstarFrequency[superstar] || 0) + 1;
+    }
+
+    // En çok çıkan sayılar
+    const topNumbers = getTopFrequent(numbersFrequency, 10);
+    const topJokers = getTopFrequent(jokerFrequency, 3);
+    const topSuperstars = getTopFrequent(superstarFrequency, 3);
+
+    // Rastgele tahminler
+    const predictions = [];
+    for (let i = 0; i < 3; i++) {
+      predictions.push(getRandomElements(topNumbers, 6));
+    }
+
+    res.json({
+      topNumbers: topNumbers.slice(0, 3),
+      topJokers,
+      topSuperstars,
+      predictions
+    });
+
+  } catch (error) {
+    console.error("Tahmin API hatası:", error);
+    res.status(500).json({ error: "Tahmin oluşturulamadı." });
+  }
+});
+
+// =========================
+//  DESTEK FONKSİYONLAR
+// =========================
+function getTopFrequent(frequencyObject, count) {
+  return Object.entries(frequencyObject)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, count)
+    .map(entry => entry[0]);
+}
+
+function getRandomElements(array, count) {
+  const shuffled = array.slice().sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
 async function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -118,9 +185,6 @@ async function getResults() {
   }
 }
 
-// =========================
-//  ANA FONKSİYON
-// =========================
 async function main() {
   console.log('🚀 Veri çekme işlemi başlatıldı...');
   try {
