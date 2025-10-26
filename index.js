@@ -19,8 +19,6 @@ const PORT = 8080;
 const mongoURI = process.env.MONGO_URI || 'mongodb+srv://<db_username>:<db_password>@rakamlar.s40cnjb.mongodb.net/lotodb';
 
 mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   dbName: 'lotodb'
 }).then(() => console.log('✅ MongoDB bağlantısı başarılı (lotodb)'))
   .catch(err => console.error('❌ MongoDB bağlantı hatası:', err));
