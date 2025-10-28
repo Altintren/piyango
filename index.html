@@ -14,30 +14,34 @@
   </header>
 
   <main>
+    <!-- 1️⃣ EN ÇOK ÇIKAN SAYILAR -->
     <section class="stats">
-      <div class="card" id="topNumbers">
+      <div class="card">
         <h2>En Çok Çıkan 10 Sayı</h2>
-        <ul id="numbersList"></ul>
+        <p id="top-numbers">Yükleniyor...</p>
       </div>
 
-      <div class="card" id="topJoker">
+      <div class="card">
         <h2>En Çok Çıkan Joker Sayı</h2>
-        <p id="jokerValue">Yükleniyor...</p>
+        <p id="top-joker">Yükleniyor...</p>
       </div>
 
-      <div class="card" id="topSuperstar">
+      <div class="card">
         <h2>En Çok Çıkan SüperStar Sayı</h2>
-        <p id="superstarValue">Yükleniyor...</p>
+        <p id="top-superstar">Yükleniyor...</p>
       </div>
     </section>
 
+    <!-- 2️⃣ TAHMİNLER -->
     <section class="predictions">
       <h2>🎯 Tahmin Sonuçları</h2>
-      <div class="prediction-cards">
-        <div class="prediction-card" id="pred1">Tahmin 1</div>
-        <div class="prediction-card" id="pred2">Tahmin 2</div>
-        <div class="prediction-card" id="pred3">Tahmin 3</div>
-      </div>
+      <ul id="prediction-list" class="prediction-cards"></ul>
+    </section>
+
+    <!-- 3️⃣ TÜM SONUÇLAR (isteğe bağlı) -->
+    <section>
+      <h2>🗓️ Tüm Haftalar</h2>
+      <div id="results"></div>
     </section>
   </main>
 
