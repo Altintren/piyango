@@ -11,10 +11,13 @@
   <header>
     <h1>🎲 LotoDB Dashboard</h1>
     <p>Tüm haftalara göre istatistikler ve tahmin sonuçları</p>
+    <div class="update-container">
+      <button id="updateButton" class="update-btn">🔄 Sonuçları Güncelle</button>
+      <div id="loadingSpinner" class="spinner" style="display:none;"></div>
+    </div>
   </header>
 
   <main>
-    <!-- 1️⃣ EN ÇOK ÇIKAN SAYILAR -->
     <section class="stats">
       <div class="card">
         <h2>En Çok Çıkan 10 Sayı</h2>
@@ -32,13 +35,11 @@
       </div>
     </section>
 
-    <!-- 2️⃣ TAHMİNLER -->
     <section class="predictions">
       <h2>🎯 Tahmin Sonuçları</h2>
       <ul id="prediction-list" class="prediction-cards"></ul>
     </section>
 
-    <!-- 3️⃣ TÜM SONUÇLAR (isteğe bağlı) -->
     <section>
       <h2>🗓️ Tüm Haftalar</h2>
       <div id="results"></div>

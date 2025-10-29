@@ -58,4 +58,32 @@ function displayFrequentNumbers(topNumbers, topJokers, topSuperstars) {
   document.getElementById('top-superstar').textContent = topSuperstars.join(', ');
 }
 
+// =========================
+//  Manuel Güncelleme Butonu
+// =========================
+const updateButton = document.getElementById('updateButton');
+const loader = document.getElementById('loadingSpinner');
+
+if (updateButton) {
+  updateButton.addEventListener('click', async () => {
+    updateButton.disabled = true;
+    loader.style.display = 'inline-block';
+    updateButton.textContent = ' Güncelleniyor...';
+
+    try {
+      const res = await fetch('/api/update-results');
+      const data = await res.json();
+      alert(data.message || 'Güncelleme tamamlandı.');
+      await fetchResultsAndPredictions();
+    } catch (err) {
+      alert('❌ Güncelleme sırasında hata oluştu.');
+      console.error(err);
+    } finally {
+      updateButton.textContent = '🔄 Sonuçları Güncelle';
+      updateButton.disabled = false;
+      loader.style.display = 'none';
+    }
+  });
+}
+
 fetchResultsAndPredictions();
