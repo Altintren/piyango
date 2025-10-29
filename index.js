@@ -95,5 +95,9 @@ app.get('/api/predictions', async (req, res) => {
       topSuperstars,
       predictions
     });
-  } catch (error) {
-    console.error("Tahmin API hatası:", erro
+    } catch (error) {
+    console.error("Tahmin API hatası:", error);
+    res.status(500).json({ error: "Tahmin oluşturulamadı." });
+  }
+});
+
