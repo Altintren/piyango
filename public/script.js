@@ -1,8 +1,8 @@
 async function fetchResultsAndPredictions() {
   try {
     const [resultsResponse, predictionsResponse] = await Promise.all([
-      fetch('/api/results'),
-      fetch('/api/predictions')
+      fetch('https://piyango-backend.onrender.com/api/update-results'),
+      fetch('https://piyango-backend.onrender.com/api/predictions')
     ]);
 
     const resultsData = await resultsResponse.json();
