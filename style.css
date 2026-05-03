@@ -1,0 +1,36 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+h1, h2 {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#results, #predictions, #frequent-numbers {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#results .result-item, #prediction-list li {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#results .result-item h2, #prediction-list li h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+#results .result-item p, #prediction-list li p {
+    margin-top: 0;
+}
