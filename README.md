@@ -1,2 +1,0 @@
-# piyango
-Lucky Numbers
