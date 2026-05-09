@@ -60,9 +60,11 @@ functions/
 
 ## Sayısal Loto Game Rules (Critical for Model Correctness)
 
+Draws happen **Monday, Wednesday, Saturday at 21:30**.
+
 - **6 main numbers**: drawn from 1–90, stored sorted ascending (draw order is lost).
-- **Joker**: NOT independently drawn. Joker = last drawn main number − 1. Since draw order is not stored, the proxy used in code is `max(numbers) − 1`. If result is 0, joker = 90.
-- **Superstar**: independently drawn from 1–90, optional extra bet. Treated as a fully independent number in frequency analysis.
+- **Joker**: independently drawn 7th number from the same 1–90 pool, **after** the 6 main numbers are removed (so joker ≠ any main number). Predicted via frequency analysis; predicted joker is always excluded from the 6 predicted main numbers.
+- **Superstar**: drawn from a completely separate second drum (1–90). Optional extra bet, independently predicted via frequency analysis.
 
 ## Scraping
 
@@ -90,7 +92,7 @@ score = baseFreq×0.30 + recentFreq×0.40 + dayFreq×0.20 + hitRate×0.10
 - `dayFreq`: frequency on the next draw's day-of-week (Wed=3, Sat=6)
 - `hitRate`: historical hit rate from evaluated predictions
 
-**Training uses only the 6 main numbers** — joker is excluded from ModelWeights, superstar has its own separate frequency map in predictor.js.
+**Training uses only the 6 main numbers** — joker and superstar each have their own separate frequency maps in predictor.js; ModelWeights tracks only main numbers.
 
 ## Prediction Constraints
 
