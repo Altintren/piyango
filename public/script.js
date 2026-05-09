@@ -1,102 +1,120 @@
 const API = 'https://piyango-backend.onrender.com';
 
-async function fetchResultsAndPredictions() {
+async function loadAll() {
   try {
-    const [resultsRes, predictionsRes] = await Promise.all([
-      fetch(`${API}/api/results`),
-      fetch(`${API}/api/predictions`)
+    const [predsRes, statsRes, perfRes] = await Promise.all([
+      fetch(`${API}/api/predictions`),
+      fetch(`${API}/api/stats`),
+      fetch(`${API}/api/performance`),
     ]);
 
-    if (!resultsRes.ok || !predictionsRes.ok) throw new Error('Sunucu hatası');
+    const preds = await predsRes.json();
+    const stats = await statsRes.json();
+    const perf  = await perfRes.json();
 
-    const resultsData    = await resultsRes.json();
-    const predictionsData = await predictionsRes.json();
-
-    displayResults(resultsData);
-    displayPredictions(predictionsData.predictions);
-    displayFrequentNumbers(
-      predictionsData.topNumbers,
-      predictionsData.topJokers,
-      predictionsData.topSuperstars
-    );
-  } catch (error) {
-    console.error('Veriler alınamadı:', error);
+    renderStats(stats, preds);
+    renderPredictions(preds);
+    renderPerformance(perf);
+  } catch (err) {
+    console.error('Veri yüklenemedi:', err);
+    document.getElementById('predictions-container').innerHTML =
+      '<p style="color:#5a5a72;text-align:center;padding:32px">Veriler yüklenirken hata oluştu.</p>';
   }
 }
 
-function displayResults(data) {
-  const container = document.getElementById('results');
+function renderStats(stats, preds) {
+  document.getElementById('totalDraws').textContent =
+    stats.totalDraws != null ? stats.totalDraws.toLocaleString('tr-TR') : '—';
+
+  document.getElementById('latestDraw').textContent =
+    stats.latestDraw?.drawDate ?? '—';
+
+  document.getElementById('modelConfidence').textContent =
+    preds.modelConfidence != null
+      ? `%${(preds.modelConfidence * 100).toFixed(1)}`
+      : '—';
+
+  document.getElementById('predDate').textContent =
+    preds.createdAt
+      ? new Date(preds.createdAt).toLocaleDateString('tr-TR')
+      : '—';
+}
+
+function renderPredictions(preds) {
+  const container = document.getElementById('predictions-container');
   container.innerHTML = '';
 
-  for (const result of data) {
-    if (!result.numbers || result.numbers.length < 6) continue;
-
-    const date = result.drawDate
-      ? new Date(result.drawDate).toLocaleDateString('tr-TR')
-      : '-';
-
-    const item = document.createElement('div');
-    item.classList.add('result-item');
-
-    let html = `<h2>${date}</h2><p>Sayılar: ${result.numbers.join(', ')}</p>`;
-    if (result.joker     != null) html += `<p>Joker: ${result.joker}</p>`;
-    if (result.superstar != null) html += `<p>Süperstar: ${result.superstar}</p>`;
-
-    item.innerHTML = html;
-    container.appendChild(item);
+  if (!preds.predictions?.length) {
+    container.innerHTML = '<p style="color:#5a5a72;padding:24px">Tahmin bulunamadı.</p>';
+    return;
   }
-}
 
-function displayPredictions(predictions) {
-  const list = document.getElementById('prediction-list');
-  list.innerHTML = '';
+  preds.predictions.forEach((pred, i) => {
+    const card = document.createElement('div');
+    card.className = 'pred-card';
 
-  predictions.forEach((pred, index) => {
-    const item = document.createElement('li');
-    let content = `<h2>Tahmin ${index + 1}</h2><p>Sayılar: ${pred.numbers.join(', ')}`;
-    if (pred.joker     != null) content += ` &nbsp;|&nbsp; Joker: ${pred.joker}`;
-    if (pred.superstar != null) content += ` &nbsp;|&nbsp; Süperstar: ${pred.superstar}`;
-    content += '</p>';
-    item.innerHTML = content;
-    list.appendChild(item);
+    const mainBalls = pred.numbers
+      .map(n => `<div class="ball ball-main">${n}</div>`)
+      .join('');
+
+    const jokerBall = pred.joker != null
+      ? `<div class="ball ball-joker">${pred.joker}</div>`
+      : '';
+
+    const superBall = pred.superstar != null
+      ? `<div class="ball ball-super">${pred.superstar}</div>`
+      : '';
+
+    card.innerHTML = `
+      <span class="pred-label">Tahmin ${i + 1}</span>
+      <div class="pred-numbers">${mainBalls}</div>
+      <div class="pred-extras">${jokerBall}${superBall}</div>
+    `;
+
+    container.appendChild(card);
   });
 }
 
-function displayFrequentNumbers(topNumbers, topJokers, topSuperstars) {
-  document.getElementById('top-numbers').textContent   = topNumbers.join(', ');
-  document.getElementById('top-joker').textContent     = topJokers.join(', ');
-  document.getElementById('top-superstar').textContent = topSuperstars.join(', ');
+function renderPerformance(perf) {
+  if (!perf.evaluatedPredictions) return;
+
+  document.getElementById('performance-section').style.display = 'block';
+
+  document.getElementById('avgHit').textContent =
+    perf.avgNumbersHit != null ? perf.avgNumbersHit.toFixed(2) : '—';
+
+  document.getElementById('bestHit').textContent =
+    perf.bestEverHitScore ?? '—';
+
+  document.getElementById('evaluated').textContent =
+    perf.evaluatedPredictions ?? '—';
+
+  const imp = perf.improvementOverRandom;
+  document.getElementById('improvement').textContent =
+    imp != null ? `${imp > 0 ? '+' : ''}${imp}` : '—';
 }
 
-// Manuel Güncelleme Butonu
-const updateButton = document.getElementById('updateButton');
-const loader       = document.getElementById('loadingSpinner');
+// Güncelle butonu
+const updateBtn = document.getElementById('updateButton');
+const spinner   = document.getElementById('loadingSpinner');
 
-if (updateButton) {
-  updateButton.addEventListener('click', async () => {
-    updateButton.disabled    = true;
-    loader.style.display     = 'inline-block';
-    updateButton.textContent = ' Güncelleniyor...';
+updateBtn.addEventListener('click', async () => {
+  updateBtn.disabled = true;
+  document.querySelector('.btn-text').textContent = 'Başlatılıyor...';
+  spinner.style.display = 'inline-block';
 
-    try {
-      const res  = await fetch(`${API}/update`);
-      const data = await res.json();
+  try {
+    await fetch(`${API}/api/update`);
+    alert('Güncelleme arka planda başlatıldı. Birkaç dakika içinde tamamlanır.');
+  } catch {
+    alert('Bağlantı hatası.');
+  } finally {
+    document.querySelector('.btn-text').textContent = 'Güncelle';
+    updateBtn.disabled = false;
+    spinner.style.display = 'none';
+  }
+});
 
-      if (data.success) {
-        alert(`Güncelleme tamamlandı. ${data.added} yeni çekiliş eklendi.`);
-        await fetchResultsAndPredictions();
-      } else {
-        alert('Güncelleme başarısız: ' + data.message);
-      }
-    } catch (err) {
-      alert('Güncelleme sırasında hata oluştu.');
-      console.error(err);
-    } finally {
-      updateButton.textContent = '🔄 Sonuçları Güncelle';
-      updateButton.disabled    = false;
-      loader.style.display     = 'none';
-    }
-  });
-}
+document.getElementById('year').textContent = new Date().getFullYear();
 
-fetchResultsAndPredictions();
+loadAll();

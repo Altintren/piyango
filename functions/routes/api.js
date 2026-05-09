@@ -1,12 +1,33 @@
 import { Router } from 'express';
-import { handleUpdate } from '../controllers/updateController.js';
-import { handlePredictions } from '../controllers/predictionController.js';
-import { handleResults } from '../controllers/resultsController.js';
+import {
+  updateResults,
+  getPredictions,
+  getPerformance,
+  getStats,
+} from '../controllers/lotteryController.js';
 
 const router = Router();
 
-router.get('/update', handleUpdate);
-router.get('/api/predictions', handlePredictions);
-router.get('/api/results', handleResults);
+const wrap = fn => async (req, res) => {
+  try {
+    const data = await fn();
+    res.json(data);
+  } catch (err) {
+    console.error(`[${req.path}] Hata:`, err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+router.get('/api/update', (req, res) => {
+  res.json({ success: true, message: 'Güncelleme arka planda başlatıldı. /api/stats ile takip edebilirsin.' });
+  updateResults().then(r => {
+    console.log(`Güncelleme tamamlandı: ${r.added} yeni, ${r.skipped} atlandı`);
+  }).catch(err => {
+    console.error('Güncelleme hatası:', err.message);
+  });
+});
+router.get('/api/predictions', wrap(getPredictions));
+router.get('/api/performance', wrap(getPerformance));
+router.get('/api/stats',       wrap(getStats));
 
 export default router;
