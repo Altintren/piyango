@@ -75,6 +75,18 @@ Source: `https://www.fotomac.com.tr/sayisal-loto-sonuclari`
 - 800ms delay between requests, 3-retry with backoff
 - Full historical scrape (~1600 draws) takes ~21 minutes — `/api/update` uses fire-and-forget pattern (responds immediately, runs in background)
 
+## Auto-Update Schedule
+
+Two-layer cron system (Istanbul timezone):
+
+| Cron | Schedule | Purpose |
+|---|---|---|
+| `0 22,23 * * 1,3,6` | Mon/Wed/Sat 22:00–23:00 | Hourly lightweight check after draw |
+| `0 0-3 * * 0,2,4` | Sun/Tue/Thu 00:00–03:00 | Hourly lightweight check (midnight carry-over) |
+| `0 4 * * 0,2,4` | Sun/Tue/Thu 04:00 | Full backup update |
+
+**Lightweight check** (`checkForNewDraw`): Fetches only the draw list (one HTTP request), compares latest `drawId` on site vs DB. Triggers full `updateResults()` only if a new draw is found. Also available as `/api/check` for manual triggering.
+
 ## ML Learning Cycle
 
 Triggered after new draws are saved (`learnFromNewDraw`):
