@@ -117,4 +117,18 @@ updateBtn.addEventListener('click', async () => {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
+function setDrawDateTitle() {
+  const day = new Date().getDay();
+  // 0=Paz,1=Pzt,2=Sal,3=Çar,4=Per,5=Cum,6=Cmt
+  // Çarşamba(3) ve Cumartesi(6) çekiliş günleri
+  const daysUntil = [3, 2, 1, 0, 2, 1, 0][day];
+  const nextDraw = new Date();
+  nextDraw.setDate(nextDraw.getDate() + daysUntil);
+  const label = nextDraw.toLocaleDateString('tr-TR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+  document.getElementById('drawDateTitle').textContent = `${label} Çekilişi Tahminleri`;
+}
+setDrawDateTitle();
+
 loadAll();
