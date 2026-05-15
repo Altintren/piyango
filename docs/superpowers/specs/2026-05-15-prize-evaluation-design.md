@@ -13,15 +13,16 @@ Yeni bir çekiliş kaydedildiğinde ödül tablosu da fotomac.com.tr'den çekili
 
 ## Ödül Kategorileri
 
-Kullanıcının tanımladığı 13 kategori (fotomac'taki etiket formatı):
+Kullanıcının tanımladığı 14 kategori (fotomac'taki etiket formatı):
 
 | Kategori etiketi (sitedeki metin) | Koşul |
 |---|---|
 | `6+SüperStar bilen kişi sayısı` | 6 ana + superstar |
 | `6 bilen kişi sayısı` | 6 ana |
 | `5+1+SüperStar bilen kişi sayısı` | 5 ana + joker + superstar |
-| `5+1 bilen kişi sayısı` | 5 ana + joker |
-| `5 bilen kişi sayısı` | 5 ana (joker olsun/olmasın, superstar tek başına sayılmaz) |
+| `5+1 bilen kişi sayısı` | 5 ana + joker (superstar yok) |
+| `5+SüperStar bilen kişi sayısı` | 5 ana + superstar (joker yok) |
+| `5 bilen kişi sayısı` | 5 ana (joker yok, superstar yok) |
 | `4+SüperStar bilen kişi sayısı` | 4 ana + superstar |
 | `4 bilen kişi sayısı` | 4 ana |
 | `3+SüperStar bilen kişi sayısı` | 3 ana + superstar |
@@ -92,8 +93,23 @@ Parse mantığı:
 ### 3. `services/learner.js` — `evaluatePrediction` genişletiliyor
 
 Yeni yardımcı fonksiyon `determinePrizeCategory(numbersHit, jokerHit, superstarHit)`:
-- Yukarıdaki tablodaki sırayla eşleşme dener
-- İlk eşleşen kategori etiketini döndürür, eşleşme yoksa `null`
+- Öncelik sırası (üstten alta):
+  1. `6 + superstar` → "6+SüperStar bilen kişi sayısı"
+  2. `6` → "6 bilen kişi sayısı"
+  3. `5 + joker + superstar` → "5+1+SüperStar bilen kişi sayısı"
+  4. `5 + joker` → "5+1 bilen kişi sayısı"
+  5. `5 + superstar` → "5+SüperStar bilen kişi sayısı"
+  6. `5` → "5 bilen kişi sayısı"
+  7. `4 + superstar` → "4+SüperStar bilen kişi sayısı"
+  8. `4` → "4 bilen kişi sayısı"
+  9. `3 + superstar` → "3+SüperStar bilen kişi sayısı"
+  10. `3` → "3 bilen kişi sayısı"
+  11. `2 + superstar` → "2+SüperStar bilen kişi sayısı"
+  12. `2` → "2 bilen kişi sayısı"
+  13. `1 + superstar` → "1+SüperStar bilen kişi sayısı"
+  14. `0 + superstar` → "0+SüperStar bilen kişi sayısı"
+  15. Hiçbiri → `null`
+- İlk eşleşen kategori etiketini döndürür
 
 `evaluatePrediction` içinde:
 - Her tahmin için `prizeCategory` hesaplanır
