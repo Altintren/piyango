@@ -2,23 +2,30 @@ const API = 'https://piyango-backend.onrender.com';
 
 async function loadAll() {
   try {
-    const [predsRes, statsRes, perfRes] = await Promise.all([
+    const [predsRes, statsRes, perfRes, recRes] = await Promise.all([
       fetch(`${API}/api/predictions`),
       fetch(`${API}/api/stats`),
       fetch(`${API}/api/performance`),
+      fetch(`${API}/api/results/recent`),
     ]);
 
     const preds = await predsRes.json();
     const stats = await statsRes.json();
     const perf  = await perfRes.json();
+    const rec   = await recRes.json();
 
     renderStats(stats, preds);
     renderPredictions(preds);
     renderPerformance(perf);
+    renderRecentResults(rec);
   } catch (err) {
     console.error('Veri yüklenemedi:', err);
-    document.getElementById('predictions-container').innerHTML =
-      '<p style="color:#5a5a72;text-align:center;padding:32px">Veriler yüklenirken hata oluştu.</p>';
+    const errP = document.createElement('p');
+    errP.style.cssText = 'color:#5a5a72;text-align:center;padding:32px';
+    errP.textContent = 'Veriler yüklenirken hata oluştu.';
+    const container = document.getElementById('predictions-container');
+    container.textContent = '';
+    container.appendChild(errP);
   }
 }
 
@@ -92,6 +99,62 @@ function renderPerformance(perf) {
   const imp = perf.improvementOverRandom;
   document.getElementById('improvement').textContent =
     imp != null ? `${imp > 0 ? '+' : ''}${imp}` : '—';
+}
+
+function renderRecentResults(data) {
+  if (!data.results?.length) return;
+
+  document.getElementById('results-section').style.display = 'block';
+  const container = document.getElementById('results-container');
+  container.textContent = '';
+
+  data.results.forEach(draw => {
+    const card = document.createElement('div');
+    card.className = 'result-draw-card';
+
+    const header = document.createElement('div');
+    header.className = 'result-draw-header';
+    header.textContent = draw.drawDate;
+    card.appendChild(header);
+
+    if (!draw.evaluation) {
+      const row = document.createElement('div');
+      row.className = 'result-row no-prediction';
+      row.textContent = 'Bu çekiliş için tahmin yapılmamıştır.';
+      card.appendChild(row);
+    } else {
+      draw.evaluation.predictions.forEach(pred => {
+        const row = document.createElement('div');
+        row.className = 'result-row';
+
+        const lbl = document.createElement('span');
+        lbl.className = 'result-pred-label';
+        lbl.textContent = `Tahmin ${pred.index + 1}`;
+        row.appendChild(lbl);
+
+        if (pred.prizeCategory) {
+          const badge = document.createElement('span');
+          badge.className = 'prize-badge';
+          badge.textContent = pred.prizeCategory.replace(' kişi sayısı', '');
+          row.appendChild(badge);
+
+          const amount = document.createElement('span');
+          amount.className = 'prize-amount';
+          amount.textContent = pred.prizeAmount;
+          row.appendChild(amount);
+        } else {
+          const noPrize = document.createElement('span');
+          noPrize.className = 'no-prize';
+          noPrize.textContent = 'Ödül kazanılamamıştır.';
+          row.appendChild(noPrize);
+        }
+
+        card.appendChild(row);
+      });
+    }
+
+    container.appendChild(card);
+  });
 }
 
 // Güncelle butonu
