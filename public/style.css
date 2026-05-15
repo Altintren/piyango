@@ -286,3 +286,73 @@ footer {
   .pred-label         { min-width: auto; }
   .perf-grid          { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* -- Recent Results -- */
+.result-draw-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.result-draw-header {
+  padding: 12px 24px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.result-row:last-child { border-bottom: none; }
+
+.result-pred-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  min-width: 62px;
+}
+
+.prize-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--super);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.prize-amount {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-left: auto;
+}
+
+.no-prize {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.no-prediction {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .result-row   { flex-wrap: wrap; gap: 8px; }
+  .prize-amount { margin-left: 0; }
+}
