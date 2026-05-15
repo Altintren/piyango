@@ -140,7 +140,7 @@ function renderRecentResults(data) {
 
           const amount = document.createElement('span');
           amount.className = 'prize-amount';
-          amount.textContent = pred.prizeAmount;
+          amount.textContent = pred.prizeAmount ?? '—';
           row.appendChild(amount);
         } else {
           const noPrize = document.createElement('span');
