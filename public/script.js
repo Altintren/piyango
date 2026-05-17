@@ -117,6 +117,31 @@ function renderRecentResults(data) {
     header.textContent = draw.drawDate;
     card.appendChild(header);
 
+    const actualRow = document.createElement('div');
+    actualRow.className = 'result-actual-row';
+    const actualNums = document.createElement('div');
+    actualNums.className = 'result-nums';
+    (draw.numbers || []).forEach(n => {
+      const ball = document.createElement('span');
+      ball.className = 'ball ball-actual';
+      ball.textContent = n;
+      actualNums.appendChild(ball);
+    });
+    if (draw.joker != null) {
+      const jball = document.createElement('span');
+      jball.className = 'ball ball-joker';
+      jball.textContent = draw.joker;
+      actualNums.appendChild(jball);
+    }
+    if (draw.superstar != null) {
+      const sball = document.createElement('span');
+      sball.className = 'ball ball-super';
+      sball.textContent = draw.superstar;
+      actualNums.appendChild(sball);
+    }
+    actualRow.appendChild(actualNums);
+    card.appendChild(actualRow);
+
     if (!draw.evaluation) {
       const row = document.createElement('div');
       row.className = 'result-row no-prediction';

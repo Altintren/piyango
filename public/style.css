@@ -316,6 +316,20 @@ footer {
   border-bottom: 1px solid var(--border);
 }
 
+.result-actual-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.ball-actual {
+  background: var(--primary);
+  border: 2px solid var(--primary);
+  color: #fff;
+}
+
 .result-row {
   display: flex;
   align-items: center;
