@@ -29,7 +29,7 @@ No test runner, no linter configured.
 
 ## Deployment
 
-- **Frontend**: Firebase Hosting → `cilginpiyango.web.app` (auto-deploys from `piyango.git`)
+- **Frontend**: Firebase Hosting → `cilginpiyango.web.app` — **NOT** auto-deployed; requires `firebase deploy --only hosting` after every push. Firebase CDN caches static assets for 1 hour — bump `?vN` query params on `style.css` and `script.js` in `index.html` after changes.
 - **Backend**: Render → `piyango-backend.onrender.com` (auto-deploys from `piyango-backend.git` on push to `main`)
 
 ## Architecture
@@ -72,8 +72,10 @@ Source: `https://www.fotomac.com.tr/sayisal-loto-sonuclari`
 
 - Draw list: `#historylistselect option` — `value` = drawId (int), text = date (DD.MM.YYYY)
 - Draw numbers: `.lottery-wins-numbers span` — classified by span count: 6 = numbers only, 7 = +joker, 8 = +joker+superstar
+- Prize table: `.lottery-wins-money-item` divs on the same detail page — each has two `<span>` children: first contains category label + winner count `<strong>`, second contains prize amount `<strong>`
 - 800ms delay between requests, 3-retry with backoff
 - Full historical scrape (~1600 draws) takes ~21 minutes — `/api/update` uses fire-and-forget pattern (responds immediately, runs in background)
+- `/api/update/status` — polls the in-memory `updateStatus` object; returns `{ running, message, startedAt }`
 
 ## Auto-Update Schedule
 
@@ -115,8 +117,36 @@ Generated combinations are rejected if they:
 
 Three fallback tiers apply progressively if all 200 balanced attempts fail.
 
+## API Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/predictions` | Active pending prediction |
+| GET | `/api/performance` | Evaluated prediction stats |
+| GET | `/api/stats` | Total draws, latest draw, model confidence |
+| GET | `/api/results/recent` | Last 3 draws with per-prediction prize evaluation |
+| GET | `/api/update` | Fire-and-forget full update (responds immediately) |
+| GET | `/api/update/status` | Current update progress (poll while running) |
+| GET | `/api/check` | Lightweight new-draw check |
+
+## Data Models
+
+### `Result`
+- `drawId`, `drawDate`, `numbers[]`, `joker`, `superstar`
+- `prizeTable[]` — `{ category, winnersCount, prizeAmount }` scraped from fotomac at save time. Empty `[]` for draws scraped before this feature was added.
+
+### `Prediction`
+- `status`: `'pending'` → `'evaluated'`
+- `predictions[]` — 3 entries, each with `{ numbers[], joker, superstar }`
+- `evaluationResults[]` — after evaluation: `{ predictionIndex, numbersHit, jokerHit, superstarHit, totalHitScore, prizeCategory, prizeAmount }`
+- `prizeCategory`/`prizeAmount` are `null` for draws evaluated before prize table scraping was added
+
+### Prize Categories (14 tiers, priority order)
+`6+SüperStar` → `6` → `5+1+SüperStar` → `5+1` → `5+SüperStar` → `5` → `4+SüperStar` → `4` → `3+SüperStar` → `3` → `2+SüperStar` → `2` → `1+SüperStar` → `0+SüperStar` → null
+
 ## MongoDB
 
 - Atlas cluster, database name: `lotodb`
+- Local `.env` URI must include `/lotodb` at the end of the connection string, otherwise Mongoose defaults to the `test` database.
 - `Result.drawId` has a unique index — duplicate inserts are caught by `err.code === 11000` and skipped.
-- The `isUpdating` flag in `lotteryController.js` prevents concurrent update runs.
+- Concurrent update runs are blocked via `updateStatus.running` flag in `lotteryController.js`.
