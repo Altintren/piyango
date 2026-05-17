@@ -329,6 +329,16 @@ footer {
   color: var(--super);
 }
 
+.ball-hit-joker {
+  background: rgba(245, 158, 11, 0.3);
+  border-width: 3px;
+}
+
+.ball-hit-super {
+  background: rgba(16, 185, 129, 0.35);
+  border-width: 3px;
+}
+
 .prize-badge {
   background: rgba(16, 185, 129, 0.15);
   color: var(--super);

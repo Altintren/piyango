@@ -136,6 +136,18 @@ function renderRecentResults(data) {
           ball.textContent = n;
           numsWrap.appendChild(ball);
         });
+        if (pred.joker != null) {
+          const jball = document.createElement('span');
+          jball.className = 'ball ball-joker' + (pred.joker === draw.joker ? ' ball-hit-joker' : '');
+          jball.textContent = pred.joker;
+          numsWrap.appendChild(jball);
+        }
+        if (pred.superstar != null) {
+          const sball = document.createElement('span');
+          sball.className = 'ball ball-super' + (pred.superstar === draw.superstar ? ' ball-hit-super' : '');
+          sball.textContent = pred.superstar;
+          numsWrap.appendChild(sball);
+        }
         row.appendChild(numsWrap);
 
         if (pred.prizeCategory) {
