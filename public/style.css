@@ -310,18 +310,23 @@ footer {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 24px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 .result-row:last-child { border-bottom: none; }
 
-.result-pred-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  min-width: 62px;
+.result-nums {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.ball-hit {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: var(--super);
+  color: var(--super);
 }
 
 .prize-badge {

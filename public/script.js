@@ -123,14 +123,20 @@ function renderRecentResults(data) {
       row.textContent = 'Bu çekiliş için tahmin yapılmamıştır.';
       card.appendChild(row);
     } else {
+      const actualSet = new Set(draw.numbers);
       draw.evaluation.predictions.forEach(pred => {
         const row = document.createElement('div');
         row.className = 'result-row';
 
-        const lbl = document.createElement('span');
-        lbl.className = 'result-pred-label';
-        lbl.textContent = `Tahmin ${pred.index + 1}`;
-        row.appendChild(lbl);
+        const numsWrap = document.createElement('div');
+        numsWrap.className = 'result-nums';
+        (pred.numbers || []).forEach(n => {
+          const ball = document.createElement('span');
+          ball.className = 'ball ball-main' + (actualSet.has(n) ? ' ball-hit' : '');
+          ball.textContent = n;
+          numsWrap.appendChild(ball);
+        });
+        row.appendChild(numsWrap);
 
         if (pred.prizeCategory) {
           const badge = document.createElement('span');
