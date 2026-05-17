@@ -287,6 +287,16 @@ footer {
   .perf-grid          { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* -- Update status bar -- */
+.update-status {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 6px 0 0;
+  text-align: right;
+}
+.update-done  { color: var(--super); }
+.update-error { color: #f87171; }
+
 /* -- Recent Results -- */
 .result-draw-card {
   background: var(--surface);

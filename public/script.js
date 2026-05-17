@@ -176,24 +176,55 @@ function renderRecentResults(data) {
 }
 
 // Güncelle butonu
-const updateBtn = document.getElementById('updateButton');
-const spinner   = document.getElementById('loadingSpinner');
+const updateBtn   = document.getElementById('updateButton');
+const spinner     = document.getElementById('loadingSpinner');
+const statusEl    = document.getElementById('update-status');
+const btnText     = document.querySelector('.btn-text');
+
+function setUpdateIdle() {
+  btnText.textContent      = 'Güncelle';
+  updateBtn.disabled       = false;
+  spinner.style.display    = 'none';
+  statusEl.style.display   = 'none';
+  statusEl.className       = 'update-status';
+}
 
 updateBtn.addEventListener('click', async () => {
-  updateBtn.disabled = true;
-  document.querySelector('.btn-text').textContent = 'Başlatılıyor...';
+  updateBtn.disabled    = true;
+  btnText.textContent   = 'Başlatılıyor...';
   spinner.style.display = 'inline-block';
+  statusEl.style.display = 'block';
+  statusEl.className     = 'update-status';
+  statusEl.textContent   = 'Sunucuya bağlanılıyor...';
 
   try {
     await fetch(`${API}/api/update`);
-    alert('Güncelleme arka planda başlatıldı. Birkaç dakika içinde tamamlanır.');
   } catch {
-    alert('Bağlantı hatası.');
-  } finally {
-    document.querySelector('.btn-text').textContent = 'Güncelle';
-    updateBtn.disabled = false;
-    spinner.style.display = 'none';
+    statusEl.textContent = 'Bağlantı hatası.';
+    statusEl.className   = 'update-status update-error';
+    setTimeout(setUpdateIdle, 4000);
+    return;
   }
+
+  btnText.textContent = 'Güncelleniyor...';
+
+  const poll = setInterval(async () => {
+    try {
+      const res    = await fetch(`${API}/api/update/status`);
+      const status = await res.json();
+      statusEl.textContent = status.message;
+
+      if (!status.running) {
+        clearInterval(poll);
+        const isError = status.message.startsWith('Hata:');
+        statusEl.className = 'update-status' + (isError ? ' update-error' : ' update-done');
+        setTimeout(async () => {
+          setUpdateIdle();
+          if (!isError) await loadAll();
+        }, 3000);
+      }
+    } catch { /* geçici ağ hatası — polling devam eder */ }
+  }, 2000);
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
