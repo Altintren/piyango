@@ -23,6 +23,7 @@ npm start          # node index.js (ESM, Node 20.x)
 Requires a `.env` file in `functions/` with:
 ```
 MONGODB_URI=<MongoDB Atlas connection string>
+SCRAPER_API_KEY=<ScraperAPI key>   # opsiyonel — olmadan doğrudan istek yapar
 ```
 
 No test runner, no linter configured.
@@ -76,6 +77,8 @@ Source: `https://www.fotomac.com.tr/sayisal-loto-sonuclari`
 - 800ms delay between requests, 3-retry with backoff
 - Full historical scrape (~1600 draws) takes ~21 minutes — `/api/update` uses fire-and-forget pattern (responds immediately, runs in background)
 - `/api/update/status` — polls the in-memory `updateStatus` object; returns `{ running, message, startedAt }`
+
+**WAF notu:** fotomac.com.tr Volterra/CloudFront WAF kullanıyor. Render ve benzeri datacenter IP'lerini blokluyor. `SCRAPER_API_KEY` ortam değişkeni varsa tüm istekler ScraperAPI üzerinden (`http://api.scraperapi.com?api_key=KEY&url=...`) yapılır. Render'da Environment Group ile hem `MONGODB_URI` hem `SCRAPER_API_KEY` tanımlı.
 
 ## Auto-Update Schedule
 
