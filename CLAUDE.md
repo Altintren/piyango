@@ -96,22 +96,26 @@ Two-layer cron system (Istanbul timezone):
 
 ## ML Learning Cycle
 
-Triggered after new draws are saved (`learnFromNewDraw`):
+Triggered after new draws are saved (`learnFromNewDraw`). Order matters:
 
-1. **Evaluate** pending prediction against the new draw result
-2. **Train** (`trainFromScratch`) — rebuilds all ModelWeights from full history
-3. **Log** (`createAnalysisLog`) — snapshots stats to AnalysisLog
+1. **Evaluate** (`evaluatePrediction`) — scores pending prediction against the new draw
+2. **Analyze** (`createAnalysisLog`) — computes component performance for this draw, derives new dynamic weights, saves AnalysisLog
+3. **Train** (`trainFromScratch`) — rebuilds ModelWeights using the fresh dynamic weights from step 2
 4. **Predict** (`generateAndSavePrediction`) — generates 3 new predictions
 
 **Weight formula:**
 ```
-score = baseFreq×0.30 + recentFreq×0.40 + dayFreq×0.20 + hitRate×0.10
+score = baseFreq×W.base + recentFreq×W.recent + dayFreq×W.day + hitRate×0.10
 ```
-- `recentFreq`: last 50 draws window
-- `dayFreq`: frequency on the next draw's day-of-week (Wed=3, Sat=6)
-- `hitRate`: **weighted** — `accumulatedHitScore / (predictedCount × 9.5)`, normalized 0–1. Each number accumulates the `totalHitScore` of every prediction it appeared in (instead of binary hit/miss). MAX_SCORE = 9.5 (6 main + 1.5 joker + 2.0 superstar).
+Weights are **dynamic** — computed from the last 30 `AnalysisLog` entries. Default (before enough data): `base=0.30, recent=0.40, day=0.20`. After backfill on ~1600 draws: `base≈0.06, recent≈0.67, day≈0.17`.
 
-**Training includes 6 main numbers + joker** — since joker is drawn from the same 1–90 pool, it contributes to frequency analysis. Superstar has its own separate frequency map in predictor.js. ModelWeights tracks main+joker frequency for numbers 1–90.
+- `recentFreq`: last 50 draws window
+- `dayFreq`: frequency on the next draw's day-of-week (Mon=1, Wed=3, Sat=6)
+- `hitRate`: weighted — `accumulatedHitScore / (predictedCount × 9.5)`, normalized 0–1. Each number accumulates the `totalHitScore` of every prediction it appeared in. MAX_SCORE = 9.5 (6 main + 1.5 joker + 2.0 superstar). Fixed weight 0.10.
+
+**Training includes 6 main numbers + joker** — same 1–90 pool, so joker contributes to frequency analysis. Superstar has its own separate frequency map in `predictor.js`. `ModelWeights` tracks main+joker frequency for numbers 1–90.
+
+**Component performance analysis** (`createAnalysisLog`): For each draw, all 90 numbers are ranked by each component. The drawn numbers' average percentile rank in each component is recorded (0.5 = random baseline). `computeDynamicWeights()` averages last 30 logs, subtracts 0.5 baseline, normalizes to sum=0.90 for frequency components. Min weight per component: 0.05, max: 0.70.
 
 ## Prediction Constraints
 
@@ -133,6 +137,8 @@ Three fallback tiers apply progressively if all 200 balanced attempts fail.
 | GET | `/api/update` | Fire-and-forget full update (responds immediately) |
 | GET | `/api/update/status` | Current update progress (poll while running) |
 | GET | `/api/check` | Lightweight new-draw check |
+| GET | `/api/analysis` | Component performance averages + current dynamic weights |
+| GET | `/api/analyze/backfill` | One-time backfill: creates AnalysisLog entries for last 30 historical draws. Idempotent — skips if logs already exist. Already ran on 2026-05-23. |
 
 ## Data Models
 
@@ -145,6 +151,15 @@ Three fallback tiers apply progressively if all 200 balanced attempts fail.
 - `predictions[]` — 3 entries, each with `{ numbers[], joker, superstar }`
 - `evaluationResults[]` — after evaluation: `{ predictionIndex, numbersHit, jokerHit, superstarHit, totalHitScore, prizeCategory, prizeAmount }`
 - `prizeCategory`/`prizeAmount` are `null` for draws evaluated before prize table scraping was added
+
+### `ModelWeights`
+- Per-number (1–90): `score`, `totalAppearances`, `totalDraws`, `recentAppearances`, `dayWeights`, `dayDrawCounts`
+- Feedback fields: `predictedCount`, `accumulatedHitScore` (replaces old `hitCount` — accumulates `totalHitScore` of predictions containing this number)
+
+### `AnalysisLog`
+- Stats: `totalDrawsInDB`, `avgHitScore`, `avgNumbersHit`, `bestEverHitScore`, `topNumbersSnapshot`, `topJokersSnapshot`, `topSuperstarsSnapshot`
+- `componentPerformance`: `{ baseFreq, recentFreq, dayFreq }` each with `{ avgPercentile }` — how well the component ranked drawn numbers (0.5 = random)
+- `dynamicWeights`: `{ baseFreq, recentFreq, dayFreq, hitRate }` — weights used for the next `trainFromScratch()`
 
 ### Prize Categories (14 tiers, priority order)
 `6+SüperStar` → `6` → `5+1+SüperStar` → `5+1` → `5+SüperStar` → `5` → `4+SüperStar` → `4` → `3+SüperStar` → `3` → `2+SüperStar` → `2` → `1+SüperStar` → `0+SüperStar` → null
