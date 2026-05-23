@@ -2,21 +2,24 @@ const API = 'https://piyango-backend.onrender.com';
 
 async function loadAll() {
   try {
-    const [predsRes, statsRes, perfRes, recRes] = await Promise.all([
+    const [predsRes, statsRes, perfRes, recRes, analysisRes] = await Promise.all([
       fetch(`${API}/api/predictions`),
       fetch(`${API}/api/stats`),
       fetch(`${API}/api/performance`),
       fetch(`${API}/api/results/recent`),
+      fetch(`${API}/api/analysis`),
     ]);
 
-    const preds = await predsRes.json();
-    const stats = await statsRes.json();
-    const perf  = await perfRes.json();
-    const rec   = await recRes.json();
+    const preds    = await predsRes.json();
+    const stats    = await statsRes.json();
+    const perf     = await perfRes.json();
+    const rec      = await recRes.json();
+    const analysis = await analysisRes.json();
 
     renderStats(stats, preds);
     renderPredictions(preds);
     renderPerformance(perf);
+    renderComponentAnalysis(analysis);
     renderRecentResults(rec);
   } catch (err) {
     console.error('Veri yüklenemedi:', err);
@@ -95,6 +98,75 @@ function renderPerformance(perf) {
   const imp = perf.improvementOverRandom;
   document.getElementById('improvement').textContent =
     imp != null ? `${imp > 0 ? '+' : ''}${imp}` : '—';
+}
+
+function renderComponentAnalysis(data) {
+  if (!data.available) return;
+
+  document.getElementById('analysis-section').style.display = 'block';
+  document.getElementById('analysisLogsUsed').textContent = data.logsUsed;
+
+  const container = document.getElementById('analysis-container');
+  container.innerHTML = '';
+
+  const components = [
+    { key: 'baseFreq',   label: 'Tarihsel Sıklık', desc: 'Tüm çekilişlerdeki frekans' },
+    { key: 'recentFreq', label: 'Son 50 Çekiliş',  desc: 'Yakın dönem frekansı' },
+    { key: 'dayFreq',    label: 'Gün Frekansı',     desc: 'Aynı gün frekansı' },
+    { key: 'hitRate',    label: 'İsabet Oranı',     desc: 'Sabit — tahmin geçmişi', fixed: true },
+  ];
+
+  const card = document.createElement('div');
+  card.className = 'analysis-card';
+
+  components.forEach(comp => {
+    const row = document.createElement('div');
+    row.className = 'comp-row';
+
+    const label = document.createElement('div');
+    label.className = 'comp-label';
+    label.innerHTML = `<div class="comp-name">${comp.label}</div><div class="comp-desc">${comp.desc}</div>`;
+    row.appendChild(label);
+
+    if (comp.fixed) {
+      const fixed = document.createElement('div');
+      fixed.className = 'comp-fixed';
+      fixed.textContent = 'sabit';
+      row.appendChild(fixed);
+    } else {
+      const pct = data.avgPercentiles[comp.key];
+
+      const barWrap = document.createElement('div');
+      barWrap.className = 'comp-bar-wrap';
+
+      const bar = document.createElement('div');
+      bar.className = 'comp-bar';
+      bar.style.width = `${(pct * 100).toFixed(1)}%`;
+      bar.style.background = pct >= 0.60 ? 'var(--super)' : pct >= 0.52 ? 'var(--primary)' : 'var(--muted)';
+
+      const baseline = document.createElement('div');
+      baseline.className = 'comp-bar-baseline';
+
+      barWrap.appendChild(bar);
+      barWrap.appendChild(baseline);
+      row.appendChild(barWrap);
+
+      const pctEl = document.createElement('div');
+      pctEl.className = 'comp-pct';
+      pctEl.style.color = bar.style.background;
+      pctEl.textContent = `%${Math.round(pct * 100)}`;
+      row.appendChild(pctEl);
+    }
+
+    const weight = document.createElement('div');
+    weight.className = 'comp-weight';
+    weight.textContent = `×${data.currentWeights[comp.key].toFixed(2)}`;
+    row.appendChild(weight);
+
+    card.appendChild(row);
+  });
+
+  container.appendChild(card);
 }
 
 function renderRecentResults(data) {

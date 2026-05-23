@@ -397,3 +397,92 @@ footer {
   .result-row   { flex-wrap: wrap; gap: 8px; }
   .prize-amount { margin-left: 0; }
 }
+
+/* ── Component Analysis ── */
+.analysis-subtitle {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.analysis-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 24px;
+}
+
+.comp-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.comp-row:last-child { border-bottom: none; }
+
+.comp-label { min-width: 130px; }
+
+.comp-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.comp-desc {
+  font-size: 0.69rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.comp-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  position: relative;
+}
+
+.comp-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.comp-bar-baseline {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  width: 2px;
+  height: 14px;
+  background: var(--muted);
+  border-radius: 1px;
+  opacity: 0.5;
+}
+
+.comp-pct {
+  font-size: 0.82rem;
+  font-weight: 700;
+  min-width: 38px;
+  text-align: right;
+}
+
+.comp-fixed {
+  flex: 1;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.comp-weight {
+  font-size: 0.75rem;
+  color: var(--muted);
+  min-width: 50px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .comp-label { min-width: 90px; }
+  .comp-desc  { display: none; }
+}

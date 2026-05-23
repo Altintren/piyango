@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sayısal Loto Tahmin</title>
-  <link rel="stylesheet" href="style.css?v=7" />
+  <link rel="stylesheet" href="style.css?v=8" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -82,6 +82,12 @@
       </div>
     </section>
 
+    <section class="section" id="analysis-section" style="display:none;">
+      <h2 class="section-title">Bileşen Analizi</h2>
+      <p class="analysis-subtitle">Son <span id="analysisLogsUsed">—</span> çekilişin ortalaması &nbsp;·&nbsp; %50 = rastgele beklenti</p>
+      <div id="analysis-container"></div>
+    </section>
+
     <section class="section" id="results-section" style="display:none;">
       <h2 class="section-title">Son Çekiliş Sonuçları</h2>
       <div id="results-container"></div>
@@ -93,6 +99,6 @@
     <p>LotoDB &copy; <span id="year"></span></p>
   </footer>
 
-  <script src="script.js?v=7"></script>
+  <script src="script.js?v=8"></script>
 </body>
 </html>
