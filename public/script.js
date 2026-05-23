@@ -64,10 +64,6 @@ function renderPredictions(preds) {
       .map(n => `<div class="ball ball-main">${n}</div>`)
       .join('');
 
-    const jokerBall = pred.joker != null
-      ? `<div class="ball ball-joker">${pred.joker}</div>`
-      : '';
-
     const superBall = pred.superstar != null
       ? `<div class="ball ball-super">${pred.superstar}</div>`
       : '';
@@ -75,7 +71,7 @@ function renderPredictions(preds) {
     card.innerHTML = `
       <span class="pred-label">Tahmin ${i + 1}</span>
       <div class="pred-numbers">${mainBalls}</div>
-      <div class="pred-extras">${jokerBall}${superBall}</div>
+      <div class="pred-extras">${superBall}</div>
     `;
 
     container.appendChild(card);
@@ -157,16 +153,23 @@ function renderRecentResults(data) {
         numsWrap.className = 'result-nums';
         (pred.numbers || []).forEach(n => {
           const ball = document.createElement('span');
-          ball.className = 'ball ball-main' + (actualSet.has(n) ? ' ball-hit' : '');
+          const isMainHit  = actualSet.has(n);
+          const isJokerHit = n === draw.joker;
+          ball.className = 'ball ball-main'
+            + (isMainHit  ? ' ball-hit'      : '')
+            + (isJokerHit ? ' ball-hit-joker' : '');
           ball.textContent = n;
           numsWrap.appendChild(ball);
         });
+
+        // Eski tahminlerde pred.joker açıkça saklanmıştı — geriye dönük uyumluluk için göster
         if (pred.joker != null) {
           const jball = document.createElement('span');
           jball.className = 'ball ball-joker' + (pred.joker === draw.joker ? ' ball-hit-joker' : '');
           jball.textContent = pred.joker;
           numsWrap.appendChild(jball);
         }
+
         if (pred.superstar != null) {
           const sball = document.createElement('span');
           sball.className = 'ball ball-super' + (pred.superstar === draw.superstar ? ' ball-hit-super' : '');

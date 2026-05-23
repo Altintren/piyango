@@ -355,7 +355,9 @@ footer {
 
 .ball-hit-joker {
   background: rgba(245, 158, 11, 0.3);
+  border-color: var(--joker);
   border-width: 3px;
+  color: var(--joker);
 }
 
 .ball-hit-super {

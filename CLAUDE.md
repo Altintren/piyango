@@ -64,8 +64,10 @@ functions/
 Draws happen **Monday, Wednesday, Saturday at 21:30**.
 
 - **6 main numbers**: drawn from 1–90, stored sorted ascending (draw order is lost).
-- **Joker**: independently drawn 7th number from the same 1–90 pool, **after** the 6 main numbers are removed (so joker ≠ any main number). Predicted via frequency analysis; predicted joker is always excluded from the 6 predicted main numbers.
-- **Superstar**: drawn from a completely separate second drum (1–90). Optional extra bet, independently predicted via frequency analysis.
+- **Joker**: independently drawn 7th number from the same 1–90 pool, **after** the 6 main numbers are removed (so joker ≠ any main number). **We do NOT predict a separate joker number.** Joker hit is evaluated by checking whether the drawn joker number appears in our 6 predicted main numbers. Old predictions in DB have `pred.joker` set — backward-compatible evaluation applies.
+- **Superstar**: drawn from a completely separate second drum (1–90). Independently predicted via frequency analysis.
+
+**Prediction format**: `{ numbers: [6 sorted ints], joker: null, superstar: int }`
 
 ## Scraping
 
@@ -107,9 +109,9 @@ score = baseFreq×0.30 + recentFreq×0.40 + dayFreq×0.20 + hitRate×0.10
 ```
 - `recentFreq`: last 50 draws window
 - `dayFreq`: frequency on the next draw's day-of-week (Wed=3, Sat=6)
-- `hitRate`: historical hit rate from evaluated predictions
+- `hitRate`: **weighted** — `accumulatedHitScore / (predictedCount × 9.5)`, normalized 0–1. Each number accumulates the `totalHitScore` of every prediction it appeared in (instead of binary hit/miss). MAX_SCORE = 9.5 (6 main + 1.5 joker + 2.0 superstar).
 
-**Training uses only the 6 main numbers** — joker and superstar each have their own separate frequency maps in predictor.js; ModelWeights tracks only main numbers.
+**Training includes 6 main numbers + joker** — since joker is drawn from the same 1–90 pool, it contributes to frequency analysis. Superstar has its own separate frequency map in predictor.js. ModelWeights tracks main+joker frequency for numbers 1–90.
 
 ## Prediction Constraints
 
