@@ -68,6 +68,32 @@ h1 {
 .btn-update:hover    { opacity: 0.82; }
 .btn-update:disabled { opacity: 0.45; cursor: not-allowed; }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-mp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 14px;
+  background: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 0 0 1px rgba(1,153,214,0.25);
+}
+.btn-mp:hover { opacity: 0.88; box-shadow: 0 0 0 2px rgba(1,153,214,0.5); }
+
+.mp-logo {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+
 /* ── Stats bar ── */
 .stats-bar {
   display: flex;

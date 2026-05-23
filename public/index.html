@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sayısal Loto Tahmin</title>
-  <link rel="stylesheet" href="style.css?v=8" />
+  <link rel="stylesheet" href="style.css?v=9" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFEB3Y8Z1S"></script>
@@ -24,10 +24,15 @@
           <h1>Sayısal Loto</h1>
           <p class="subtitle">Yapay zeka destekli tahmin sistemi</p>
         </div>
-        <button id="updateButton" class="btn-update">
-          <span class="btn-text">Güncelle</span>
-          <div id="loadingSpinner" class="spinner" style="display:none;"></div>
-        </button>
+        <div class="header-actions">
+          <a href="https://www.millipiyangoonline.com/sayisal-loto" target="_blank" rel="noopener noreferrer" class="btn-mp" title="Milli Piyango Online">
+            <img src="mp_logo.svg" alt="Milli Piyango" class="mp-logo" />
+          </a>
+          <button id="updateButton" class="btn-update">
+            <span class="btn-text">Güncelle</span>
+            <div id="loadingSpinner" class="spinner" style="display:none;"></div>
+          </button>
+        </div>
       </div>
       <div id="update-status" class="update-status" style="display:none;"></div>
     </header>
@@ -107,6 +112,6 @@
     <p>LotoDB &copy; <span id="year"></span></p>
   </footer>
 
-  <script src="script.js?v=8"></script>
+  <script src="script.js?v=9"></script>
 </body>
 </html>
