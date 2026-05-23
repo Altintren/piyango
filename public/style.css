@@ -53,7 +53,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
+  padding: 7px 22px;
   background: var(--primary);
   color: #fff;
   border: none;
