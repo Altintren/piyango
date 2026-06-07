@@ -30,7 +30,7 @@ No test runner, no linter configured.
 
 ## Deployment
 
-- **Frontend**: Firebase Hosting → `cilginpiyango.web.app` — **NOT** auto-deployed; requires `firebase deploy --only hosting` after every push. Firebase CDN caches static assets for 1 hour — bump `?vN` query params on `style.css` and `script.js` in `index.html` after changes.
+- **Frontend**: Firebase Hosting → `cilginpiyango.web.app` — **NOT** auto-deployed; requires `firebase deploy --only hosting` after every push. Firebase CDN caches static assets for 1 hour — bump `?vN` query params on `style.css` and `script.js` in `index.html` after changes. Current versions: `style.css?v=10`, `script.js?v=10`.
 - **Backend**: Render → `piyango-backend.onrender.com` (auto-deploys from `piyango-backend.git` on push to `main`)
 
 ## Architecture
@@ -65,9 +65,13 @@ Draws happen **Monday, Wednesday, Saturday at 21:30**.
 
 - **6 main numbers**: drawn from 1–90, stored sorted ascending (draw order is lost).
 - **Joker**: independently drawn 7th number from the same 1–90 pool, **after** the 6 main numbers are removed (so joker ≠ any main number). **We do NOT predict a separate joker number.** Joker hit is evaluated by checking whether the drawn joker number appears in our 6 predicted main numbers. Old predictions in DB have `pred.joker` set — backward-compatible evaluation applies.
-- **Superstar**: drawn from a completely separate second drum (1–90). Independently predicted via frequency analysis.
+- **Superstar**: drawn from a completely separate second drum (1–90). Independently predicted via frequency analysis. **Superstar is compared ONLY to the predicted superstar — never to predicted main numbers or the drawn joker.**
 
 **Prediction format**: `{ numbers: [6 sorted ints], joker: null, superstar: int }`
+
+**Superstar isolation rule** (enforced in both `evaluatePrediction` and frontend `renderRecentResults`):
+- `actualSet` is always built from `numbers.slice(0, 6)` — guards against old DB records where joker/superstar may have been stored inside `numbers[]`
+- `drawnJoker` is set to `null` if `draw.joker === draw.superstar` — prevents superstar value from triggering a joker-hit highlight (indicates a scraper parse error in that record)
 
 ## Scraping
 
