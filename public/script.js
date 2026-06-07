@@ -216,7 +216,11 @@ function renderRecentResults(data) {
       row.textContent = 'Bu çekiliş için tahmin yapılmamıştır.';
       card.appendChild(row);
     } else {
-      const actualSet = new Set(draw.numbers);
+      // Sadece ilk 6 ana sayı — joker/süperstar ana sayılar kümesine dahil edilmez
+      const actualSet = new Set((draw.numbers || []).slice(0, 6));
+      // Joker, süperstar ile aynı değere sahipse işaretlenmez (parse hatası koruması)
+      const drawnJoker = (draw.joker != null && draw.joker !== draw.superstar) ? draw.joker : null;
+
       draw.evaluation.predictions.forEach(pred => {
         const row = document.createElement('div');
         row.className = 'result-row';
@@ -226,7 +230,7 @@ function renderRecentResults(data) {
         (pred.numbers || []).forEach(n => {
           const ball = document.createElement('span');
           const isMainHit  = actualSet.has(n);
-          const isJokerHit = n === draw.joker;
+          const isJokerHit = drawnJoker != null && n === drawnJoker;
           ball.className = 'ball ball-main'
             + (isMainHit  ? ' ball-hit'      : '')
             + (isJokerHit ? ' ball-hit-joker' : '');
@@ -237,7 +241,7 @@ function renderRecentResults(data) {
         // Eski tahminlerde pred.joker açıkça saklanmıştı — geriye dönük uyumluluk için göster
         if (pred.joker != null) {
           const jball = document.createElement('span');
-          jball.className = 'ball ball-joker' + (pred.joker === draw.joker ? ' ball-hit-joker' : '');
+          jball.className = 'ball ball-joker' + (pred.joker === drawnJoker ? ' ball-hit-joker' : '');
           jball.textContent = pred.joker;
           numsWrap.appendChild(jball);
         }
